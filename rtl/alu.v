@@ -8,28 +8,6 @@ module alu (
     output reg        zero    // Zero flag: 1 if result is 0
 );
 
-    // --- ALU Control Signal Map ---
-    // This table defines all 16 possible operations for the 4-bit control signal.
-    // -------------------------------------------------------------------------
-    // | Code    | localparam  | Operation                   |
-    // |---------|-------------|-----------------------------|
-    // | 4'b0000 | ALU_OP_AND  | A & B (AND)                 |
-    // | 4'b0001 | ALU_OP_OR   | A | B (OR)                  |
-    // | 4'b0010 | ALU_OP_ADD  | A + B (Add)                 |
-    // | 4'b0011 | --- פנוי --- |                             |
-    // | 4'b0100 | --- פנוי --- |                             |
-    // | 4'b0101 | --- פנוי --- |                             |
-    // | 4'b0110 | ALU_OP_SUB  | A - B (Subtract)            |
-    // | 4'b0111 | ALU_OP_SLT  | $signed(A) < $signed(B) ? 1:0 |
-    // | 4'b1000 | ALU_OP_XOR  | A ^ B (XOR)                 |
-    // | 4'b1001 | ALU_OP_NOR  | ~(A | B) (NOR)              |
-    // | 4'b1010 | ALU_OP_SLLV | B << A[4:0] (Shift Left)    |
-    // | 4'b1011 | ALU_OP_SRLV | B >> A[4:0] (Shift Right)   |
-    // | 4'b1100 | --- פנוי --- |                             |
-    // | 4'b1101 | --- פנוי --- |                             |
-    // | 4'b1110 | --- פנוי --- |                             |
-    // | 4'b1111 | --- פנוי --- |                             |
-    // -------------------------------------------------------------------------
 
     // --- Operation Codes (localparam definitions) ---
     localparam ALU_OP_ADD  = 4'b0010;
