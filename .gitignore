@@ -1,0 +1,15 @@
+# קבצי פלט של סימולציה
+*.vcd
+
+# קבצי הרצה מקומפלים בתיקיית sim
+sim/alu_sim
+sim/control_sim
+sim/mem_sim
+sim/mips_core_branch_sim
+sim/mips_core_mem_sim
+sim/mips_core_sim
+sim/regfile_sim
+sim/gpio_sim
+sim/uart_sim
+sim/mcu_sim
+sim/mcu_final_sim
