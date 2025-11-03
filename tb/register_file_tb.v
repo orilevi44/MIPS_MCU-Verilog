@@ -37,6 +37,21 @@ module register_file_tb;
         #5 tb_clk = ~tb_clk; // Toggle clock every 5ns
     end
 
+        // --- Task for writing a register value ---
+    task write_register;
+        input [4:0]  addr; // to wich register we want to write 
+        input [31:0] value; // what value we want to write
+        begin
+            @(posedge tb_clk); // Wait for a clock edge
+            tb_reg_write  = 1'b1;
+            tb_write_addr = addr;
+            tb_write_data = value;
+            @(posedge tb_clk); // Wait one more clock cycle
+            tb_reg_write  = 1'b0; // Stop writing
+            #1;
+        end
+    endtask
+
     // --- Task for checking a register value ---
     task check_register;
         input [4:0]  addr;
@@ -59,22 +74,6 @@ module register_file_tb;
         end
     endtask
 
-    // --- Task for writing a register value ---
-    task write_register;
-        input [4:0]  addr;
-        input [31:0] value;
-        begin
-            @(posedge tb_clk); // Wait for a clock edge
-            tb_reg_write  = 1'b1;
-            tb_write_addr = addr;
-            tb_write_data = value;
-            @(posedge tb_clk); // Wait one more clock cycle
-            tb_reg_write  = 1'b0; // Stop writing
-            #1;
-        end
-    endtask
-
-
     // --- Main Test Sequence ---
     initial begin
         // 1. Setup VCD dump
@@ -85,7 +84,8 @@ module register_file_tb;
 
         // 2. Apply Reset
         tb_rst = 1'b1;
-        tb_reg_write = 1'b0; // Initialize signals
+        // Initialize signals
+        tb_reg_write = 1'b0; 
         tb_write_addr = 5'd0;
         tb_write_data = 32'd0;
         tb_read_addr1 = 5'd0;
@@ -137,7 +137,6 @@ module register_file_tb;
         end else begin
             $display("--- Test Passed --- (Dual Read OK)");
         end
-
 
         $display("--- All Register File Tests Passed! ---");
         $finish;
