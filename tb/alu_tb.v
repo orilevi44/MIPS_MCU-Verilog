@@ -1,4 +1,4 @@
-// alu_tb.v (FIXED VERSION 4)
+// alu_tb.v 
 `timescale 1ns/1ps
 
 module alu_tb;
@@ -13,12 +13,16 @@ module alu_tb;
     wire [31:0] tb_result;
     wire        tb_zero;
 
-    // --- Operation Codes (must match alu.v) ---
-    localparam ALU_OP_ADD = 4'b0010;
-    localparam ALU_OP_SUB = 4'b0110;
-    localparam ALU_OP_AND = 4'b0000;
-    localparam ALU_OP_OR  = 4'b0001;
-    localparam ALU_OP_SLT = 4'b0111;
+    // --- Operation Codes (match alu.v) ---
+    localparam ALU_OP_ADD  = 4'b0010;
+    localparam ALU_OP_SUB  = 4'b0110;
+    localparam ALU_OP_AND  = 4'b0000;
+    localparam ALU_OP_OR   = 4'b0001;
+    localparam ALU_OP_SLT  = 4'b0111; // Set on Less Than
+    localparam ALU_OP_XOR  = 4'b1000;
+    localparam ALU_OP_NOR  = 4'b1001;
+    localparam ALU_OP_SLLV = 4'b1010; // Shift Left Logical Variable
+    localparam ALU_OP_SRLV = 4'b1011; // Shift Right Logical Variable
 
     // --- Instantiate the DUT ---
     alu dut (
@@ -43,7 +47,7 @@ module alu_tb;
         input [31:0] b;
         input [3:0]  op;
         begin
-            @(posedge tb_clk); // Wait for the next clock edge
+            @(posedge tb_clk); 
             tb_a           = a;
             tb_b           = b;
             tb_alu_control = op;
@@ -69,7 +73,6 @@ module alu_tb;
             end
         end
     endtask
-
 
     // --- Main Test Sequence ---
     initial begin
@@ -105,19 +108,29 @@ module alu_tb;
         
         // Test 7: SLT (10 < 5 -> False (0))
         apply_stimulus(32'd10, 32'd5, ALU_OP_SLT);
-        check_result(32'd0, 1'b1); // Result is 0, so Zero flag is 1!
+        check_result(32'd0, 1'b1); // Result is 0 (worng) so Zero flag is 1!
 
-        // --- !!! FIXED TEST 8 !!! ---
         // Test 8: SLT with negative numbers (-10 < 5 -> True (1))
         // We use the hex value for -10 (32'hFFFFFFF6)
         apply_stimulus(32'hFFFFFFF6, 32'd5, ALU_OP_SLT);
         check_result(32'd1, 1'b0);
         
-        // --- !!! FIXED TEST 9 !!! ---
         // Test 9: SLT with negative numbers (-5 < -10 -> False (0))
         // We use hex value for -5 (32'hFFFFFFFB) and -10 (32'hFFFFFFF6)
         apply_stimulus(32'hFFFFFFFB, 32'hFFFFFFF6, ALU_OP_SLT);
         check_result(32'd0, 1'b1);
+
+        // Test 10: Simple XOR (11110000,10101100)
+        apply_stimulus(8'b11110000,8'b10101100,ALU_OP_XOR);
+        check_result(8'b01011100,1'b0);
+
+        // Test 11: Shift Left 3 times logical variable (10101100->10101100000)
+        apply_stimulus(32'd3,32'b10101100,ALU_OP_SLLV);
+        check_result(32'b10101100000,1'b0);
+
+        // Test 12: Shift Right 10 times logical variable (10000000000->00000000001)
+        apply_stimulus(32'd10,32'b10000000000,ALU_OP_SRLV);
+        check_result(32'b00000000001,1'b0);
         
         $display("--- All ALU Tests Passed! ---");
         $finish; // End simulation

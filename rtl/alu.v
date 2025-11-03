@@ -8,7 +8,6 @@ module alu (
     output reg        zero    // Zero flag: 1 if result is 0
 );
 
-
     // --- Operation Codes (localparam definitions) ---
     localparam ALU_OP_ADD  = 4'b0010;
     localparam ALU_OP_SUB  = 4'b0110;
