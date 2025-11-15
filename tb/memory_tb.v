@@ -69,35 +69,61 @@ module memory_tb;
 
     // --- Main Test Sequence ---
     initial begin
-        // 1. Setup VCD dump
+        // Setup VCD dump
         $dumpfile("memory.vcd");
         $dumpvars(0, memory_tb);
 
         $display("--- Starting Memory Test ---");
 
-        // 2. Initialize signals
+        // Initialize signals
         tb_write_enable = 1'b0;
         tb_addr         = 10'd0;
         tb_write_data   = 32'd0;
 
-        // 3. Test 1: Write to address 10
+        // Test 1: Write to address 10
         $display("--- Writing 0xAAAAAAAA to addr 10 ---");
         mem_write(10'd10, 32'hAAAAAAAA);
 
-        // 4. Test 2: Read back from address 10
+        // Test 2: Read back from address 10
         mem_check(10'd10, 32'hAAAAAAAA);
 
-        // 5. Test 3: Write to address 500
+        // Test 3: Write to address 500
         $display("--- Writing 0xBBBBBBBB to addr 500 ---");
         mem_write(10'd500, 32'hBBBBBBBB);
 
-        // 6. Test 4: Read back from address 500
+        // Test 4: Read back from address 500
         mem_check(10'd500, 32'hBBBBBBBB);
 
-        // 7. Test 5: Check persistence
+        // Test 5: Check persistence
         $display("--- Checking addr 10 again (persistence) ---");
         mem_check(10'd10, 32'hAAAAAAAA);
+
+        // Test 6: read and write at the same time
+        $display("--- cheking read and write at the same time");
         
+        mem_write(10'd20, 32'd15);
+        mem_check(10'd20, 32'd15);
+        @(posedge tb_clk)
+        tb_write_enable = 1'b1;  
+        tb_addr = 10'd20;  
+        tb_write_data = 32'd7;
+
+        if (tb_read_data == 32'd7) begin
+            $display("--- !!! TEST FAILED !!! ---");
+            $display("Time: %t", $time);
+            $display("Read and write from/to addr %d. Expected: 15 (old value), Got: %d (new value)",
+                         tb_addr, tb_write_data);
+        end
+        else $display("---Test 6 : Passed -the value that we read is not the new one");
+        
+        @(posedge tb_clk)
+        tb_write_enable = 1'b0;  
+        #1;
+        if (tb_read_data == 32'd7) begin
+            $display("--- Test Passed ---  we Read from addr %d the value %d (old value-that we put the same time we write)",tb_addr,tb_write_data);
+        end   
+        else $display("--- Test 6 : Faild! the value in addr %d is %d",tb_addr,tb_write_data);
+
         $display("--- All Memory Tests Passed! ---");
         $finish;
     end
