@@ -96,35 +96,35 @@ module register_file_tb;
         tb_rst = 1'b0; // Release reset
         $display("--- Reset Released ---");
         
-        // 3. Test 1: Check if $zero (reg 0) is 0 after reset
+        // Test 1: Check if $zero (reg 0) is 0 after reset
         check_register(5'd0, 32'd0);
 
-        // 4. Test 2: Write to reg 5
+        // Test 2: Write to reg 5
         $display("--- Writing 0xDEADBEEF to reg 5 ---");
         write_register(5'd5, 32'hDEADBEEF);
         
-        // 5. Test 3: Read back from reg 5
+        // Test 3: Read back from reg 5
         check_register(5'd5, 32'hDEADBEEF);
 
-        // 6. Test 4: Write to reg 10
+        // Test 4: Write to reg 10
         $display("--- Writing 0xCAFECAFE to reg 10 ---");
         write_register(5'd10, 32'hCAFECAFE);
 
-        // 7. Test 5: Read back from reg 10
+        // Test 5: Read back from reg 10
         check_register(5'd10, 32'hCAFECAFE);
 
-        // 8. Test 6: Check if reg 5 still has its value
+        // Test 6: Check if reg 5 still has its value
         $display("--- Checking reg 5 value (persistence) ---");
         check_register(5'd5, 32'hDEADBEEF);
 
-        // 9. Test 7: Corner Case - Try to write to $zero (reg 0)
+        // Test 7: Corner Case - Try to write to $zero (reg 0)
         $display("--- Trying to write to reg 0 (should fail) ---");
         write_register(5'd0, 32'h12345678);
 
-        // 10. Test 8: Check if $zero is still 0
+        // Test 8: Check if $zero is still 0
         check_register(5'd0, 32'd0);
         
-        // 11. Test 9: Check dual read ports
+        // Test 9: Check dual read ports
         $display("--- Checking dual read ports (reg 5 and reg 10) ---");
         @(posedge tb_clk);
         tb_read_addr1 = 5'd5;
@@ -138,8 +138,41 @@ module register_file_tb;
             $display("--- Test Passed --- (Dual Read OK)");
         end
 
+        // Test 10:Read and write at the same time 
+        
+        write_register(5'd12,32'd100);
+        check_register(5'd12,32'd100);
+        $display("---Checking read and write at the same time---");
+
+        @(posedge tb_clk);
+        tb_read_addr1 = 5'd12;
+        tb_write_addr = 5'd12;
+        tb_write_data = 32'd999;
+        tb_reg_write = 1'd1;
+        //#1;
+        if (tb_read_data1 !== 32'd100) begin
+            $display("--- !!! TEST 10 FAILED (RWW) !!! ---");
+            $display("Read port showed %d, expected OLD value 100", tb_read_data1);
+            $finish;
+        end
+        $display("--- Test 10 Passed (Read-Before-Write OK) ---");
+
+        // let the clock edge happen
+        @(posedge tb_clk);
+        tb_reg_write = 1'b0; // Stop writing
+        #1; // Wait for read logic
+
+        // The read port should NOW show the NEW value (999)
+        if (tb_read_data1 !== 32'd999) begin
+            $display("--- !!! TEST 10 FAILED (Write Check) !!! ---");
+            $display("After write, port showed %d, expected NEW value 999", tb_read_data1);
+            $finish;
+        end
+        $display("--- Test 10 Passed (Write completed OK) ---");
+
         $display("--- All Register File Tests Passed! ---");
         $finish;
+
     end
 
 endmodule

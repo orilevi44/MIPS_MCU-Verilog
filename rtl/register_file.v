@@ -1,4 +1,4 @@
-// register_file.v (FIXED VERSION 2)
+// register_file.v 
 // MIPS Register File (32 registers, 32-bits each)
 module register_file (
     input         clk,
@@ -16,13 +16,10 @@ module register_file (
     // where each element is 32 bits wide.
     reg [31:0] registers [0:31];
 
-    // --- !!! MOVED HERE !!! ---
-    // Declaring 'i' here at the module level
-    // to fix the SystemVerilog error.
+    // Declaring 'i' here at the module level to fix the SystemVerilog error.
     integer i;
 
     // --- Sequential Write Logic ---
-    // This block triggers on the clock edge OR reset edge
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             // On reset, clear all registers to 0
@@ -32,10 +29,7 @@ module register_file (
             end
         end 
         else if (reg_write) begin
-            // On a clock edge, if write is enabled:
-            // Write the data to the specified address
-            
-            // --- CRITICAL: Handle register $zero ---
+            // On a clock edge, if write is enabled: Write the data to the specified address
             // We must ensure that register 0 ALWAYS stays 0.
             if (write_addr != 5'd0) begin
                 registers[write_addr] <= write_data;
@@ -45,7 +39,9 @@ module register_file (
 
     // --- Combinational Read Logic ---
     // Reading is asynchronous (no clock).
+    
     assign read_data1 = registers[read_addr1];
     assign read_data2 = registers[read_addr2];
+    
 
 endmodule
